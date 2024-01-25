@@ -92,6 +92,7 @@ const catPost = async (
       user_id,
       role,
     };
+
     const result = await addCat(cat);
     res.json(result);
   } catch (error) {
@@ -116,9 +117,10 @@ const catPut = async (
   }
 
   try {
+    const user = req.user as User;
     const id = Number(req.params.id);
     const cat = req.body;
-    const result = await updateCat(cat, id); // Remove the extra arguments
+    const result = await updateCat(cat, id, user); // Remove the extra arguments
     res.json(result);
   } catch (error) {
     next(error);
@@ -130,11 +132,11 @@ const catPut = async (
 // catDelete should use validationResult to validate req.params.id
 
 const catDelete = async (
-  req: Request<{id: string}, {}, Cat>,
+  req: Request<{id: Request}, {}, Cat>,
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req.params.id);
   if (!errors.isEmpty()) {
     const messages: string = errors
       .array()

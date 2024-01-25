@@ -53,7 +53,7 @@ const userPost = async (
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req.body);
   if (!errors.isEmpty()) {
     const messages: string = errors
       .array()
@@ -62,6 +62,18 @@ const userPost = async (
     console.log('cat_post validation', messages);
     next(new CustomError(messages, 400));
     return;
+  }
+
+  if (req.body.user_name.length < 3) {
+    throw new CustomError('User name too short', 400);
+  }
+
+  if (req.body.email.length < 5) {
+    throw new CustomError('Email too short', 400);
+  }
+
+  if (req.body.password.length < 5) {
+    throw new CustomError('Password too short', 400);
   }
 
   try {
@@ -143,11 +155,11 @@ const userPutCurrent = async (
 // userDelete should use req.user to get role
 
 const userDelete = async (
-  req: Request<{id: number}, {}, User>,
+  req: Request<{id: User}, {}, User>,
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req.params.id);
   if (!errors.isEmpty()) {
     const messages: string = errors
       .array()
@@ -159,12 +171,12 @@ const userDelete = async (
   }
 
   try {
-    const user = req.body;
+    const user = req.user;
     if (user && user.role !== 'admin') {
       throw new CustomError('Admin only', 403);
     }
 
-    const result = await deleteUser(req.params.id);
+    const result = await deleteUser(Number(req.params.id));
 
     res.json(result);
   } catch (error) {
