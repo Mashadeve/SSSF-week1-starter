@@ -52,7 +52,9 @@ const getCat = async (catId: number): Promise<Cat> => {
 
 // TODO: use Utility type to modify Cat type for 'data'.
 // Note that owner is not User in this case. It's just a number (user_id)
-const addCat = async (data: Cat): Promise<MessageResponse> => {
+const addCat = async (
+  data: Omit<Cat, 'owner'> & {owner: number}
+): Promise<UploadResponse> => {
   const [headers] = await promisePool.execute<ResultSetHeader>(
     `
     INSERT INTO sssf_cat (cat_name, weight, owner, filename, birthdate, coords) 
@@ -71,7 +73,7 @@ const addCat = async (data: Cat): Promise<MessageResponse> => {
   if (headers.affectedRows === 0) {
     throw new CustomError('No cats added', 400);
   }
-  return {message: 'Cat added'};
+  return {message: 'Cat added', id: headers.insertId};
 };
 
 // TODO: create updateCat function to update single cat

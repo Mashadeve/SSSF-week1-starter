@@ -57,7 +57,7 @@ const catPost = async (
   // catPost should use res.locals.coords to get lat and lng (see middlewares.ts)
   // catPost should use req.user to get user_id and role (see passport/index.ts and express.d.ts)
   // catPost should use res.status(201) for successful operation
-  const errors = validationResult(req);
+  const errors = validationResult(req.body);
   if (!errors.isEmpty()) {
     const messages: string = errors
       .array()
@@ -69,9 +69,31 @@ const catPost = async (
   }
 
   try {
-    const cat = req.body;
+    if (!req.file) {
+      next(new CustomError('Missing file', 400));
+      return;
+    }
+    const filename = req.file.filename;
+    const [lat, lng] = res.locals.coords;
+    const {user_id, role} = req.user as User;
+    const cat: Omit<Cat, 'owner'> & {
+      owner: number;
+      filename: string;
+      lat: number;
+      lng: number;
+      user_id: number;
+      role: string;
+    } = {
+      ...req.body,
+      owner: user_id,
+      filename,
+      lat,
+      lng,
+      user_id,
+      role,
+    };
     const result = await addCat(cat);
-    res.status(201).json(result);
+    res.json(result);
   } catch (error) {
     next(error);
   }

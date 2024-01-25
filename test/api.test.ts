@@ -20,6 +20,7 @@ import {
   userPutCat,
 } from './catFunctions';
 import {User} from '../src/types/DBTypes';
+import {clearScreenDown} from 'readline';
 
 describe('GET /api/v1', () => {
   afterAll(async () => {
@@ -85,6 +86,7 @@ describe('GET /api/v1', () => {
   it('should upload a cat', async () => {
     const message = await postCat(app, token, owner, 'cat.jpg');
     catID = message.id!;
+    console.log('TÄMÄ TÄÄLÄ ' + message.id);
   });
 
   // test cat upload with GPS
@@ -101,6 +103,7 @@ describe('GET /api/v1', () => {
 
   // test get single cat
   it('should return single cat', async () => {
+    console.log('VÄHÄ JOTAI ' + catID);
     await getSingleCat(app, catID);
   });
 
